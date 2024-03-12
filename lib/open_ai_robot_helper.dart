@@ -35,7 +35,7 @@ class OpenAiRobotHelper {
         double valume = (amplitude.current - (-45) ) / (-45);
         print('valume: $valume');
         print('amplitude: ${amplitude.current}');
-        if (amplitude.current > -30) {
+        if (amplitude.current > -10) {
           print('Laoud: ---------------------->');
           silenceDuration = DateTime.now();
           if (DateTime.now().difference(startDuration).inSeconds > 60) {
@@ -47,7 +47,7 @@ class OpenAiRobotHelper {
           }
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 15) {
+          if (DateTime.now().difference(silenceDuration).inSeconds > 10) {
             await stopRecording();
             final textResult =
                 await openAIMain.convertAudioToText('${path.path}/speech.m4a');
