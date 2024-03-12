@@ -1,12 +1,18 @@
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:open_ai_robot_helper/open_ai/option.dart';
 import 'package:open_ai_robot_helper/open_ai_robot_helper.dart';
 
 final open = OpenAiRobotHelper();
 
 void main() async {
-  open.init('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',
-      'org-sxjmO2cujjHwd3DMmYATC1T9');
+  open.init(
+      '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',
+      'org-sxjmO2cujjHwd3DMmYATC1T9',
+      OpenAiOption(
+        character: Character.house,
+        guidance: [],
+      ));
   runApp(const MyApp());
 }
 
@@ -63,6 +69,7 @@ class MyHomePage extends StatefulWidget {
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   String text = '';
+  String response = '';
   bool isRecording = false;
 
   @override
@@ -73,8 +80,15 @@ class _MyHomePageState extends State<MyHomePage>
         isRecording = false;
         text = event;
       });
+      sendToGpt();
     });
     WidgetsBinding.instance.addObserver(this);
+  }
+
+  sendToGpt() async {
+    response = await open.sendANewMessage(text);
+    await open.getSpeechAudio(response);
+    setState(() {});
   }
 
   @override
@@ -91,7 +105,7 @@ class _MyHomePageState extends State<MyHomePage>
               await open.startRecording();
               isRecording = true;
             } else {
-              await open.cleanRecording(true);
+              await open.cleanRecording();
               isRecording = false;
             }
             setState(() {});
@@ -105,6 +119,9 @@ class _MyHomePageState extends State<MyHomePage>
             children: <Widget>[
               Text(
                 text,
+              ),
+              Text(
+                response,
               ),
             ],
           ),
