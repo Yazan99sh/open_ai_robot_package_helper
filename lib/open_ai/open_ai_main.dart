@@ -1,3 +1,4 @@
+import 'dart:io';
 import 'package:dart_openai/dart_openai.dart';
 import 'package:flutter/foundation.dart';
 
@@ -10,5 +11,14 @@ class OpenAIMain {
       OpenAI.showLogs = true;
       OpenAI.showResponsesLogs = true;
     }
+  }
+
+  Future<String> convertAudioToText(String audioPath) async {
+    final result = await OpenAI.instance.audio.createTranscription(
+      file: File(audioPath),
+      model: 'whisper-1',
+      responseFormat: OpenAIAudioResponseFormat.json,
+    );
+    return result.text;
   }
 }

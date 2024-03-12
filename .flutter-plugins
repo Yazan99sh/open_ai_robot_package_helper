@@ -1,12 +1,12 @@
 # This is a generated file; do not edit or check into version control.
-mic_stream=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\mic_stream-0.7.1+2\\
-path_provider=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\path_provider-2.1.2\\
-path_provider_android=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\path_provider_android-2.2.2\\
-path_provider_foundation=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\path_provider_foundation-2.3.2\\
-path_provider_linux=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\path_provider_linux-2.2.1\\
-path_provider_windows=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\path_provider_windows-2.2.1\\
-permission_handler=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler-11.3.0\\
-permission_handler_android=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_android-12.0.5\\
-permission_handler_apple=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_apple-9.4.0\\
-permission_handler_html=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_html-0.1.1\\
-permission_handler_windows=C:\\Users\\User\\AppData\\Local\\Pub\\Cache\\hosted\\pub.dev\\permission_handler_windows-0.2.1\\
+path_provider=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/path_provider-2.1.2/
+path_provider_android=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/path_provider_android-2.2.2/
+path_provider_foundation=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/path_provider_foundation-2.3.2/
+path_provider_linux=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/path_provider_linux-2.2.1/
+path_provider_windows=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/path_provider_windows-2.2.1/
+record=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record-5.0.4/
+record_android=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record_android-1.0.4/
+record_darwin=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record_darwin-1.0.1/
+record_linux=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record_linux-0.7.1/
+record_web=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record_web-1.0.5/
+record_windows=/Users/altkamul-flutter/.pub-cache/hosted/pub.dev/record_windows-1.0.2/

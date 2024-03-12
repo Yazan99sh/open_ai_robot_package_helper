@@ -11,7 +11,7 @@ dependencies:
   flutter:
     sdk: flutter
   dart_openai: ^5.1.0
-  mic_stream: ^0.7.1+2
+  record: ^5.0.4
   path_provider: ^2.0.0
   path: ^1.8.2
 

@@ -1,11 +1,10 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
-import 'package:open_ai_robot_helper/listen/listen.dart';
 import 'package:open_ai_robot_helper/open_ai_robot_helper.dart';
 
+final open = OpenAiRobotHelper();
+
 void main() async {
-  final open = OpenAiRobotHelper();
   open.init('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',
       'org-sxjmO2cujjHwd3DMmYATC1T9');
   runApp(const MyApp());
@@ -63,280 +62,60 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage>
     with SingleTickerProviderStateMixin, WidgetsBindingObserver {
-  final listenToMic = ListenToMic();
-  int page = 0;
-  late AnimationController controller;
-  Color _iconColor = Colors.white;
-
-  Color _getBgColor() => (listenToMic.isRecording) ? Colors.red : Colors.cyan;
-
-  Icon _getIcon() =>
-      (listenToMic.isRecording) ? Icon(Icons.stop) : Icon(Icons.keyboard_voice);
+  String text = '';
+  bool isRecording = false;
 
   @override
   void initState() {
-    print("Init application");
     super.initState();
-    WidgetsBinding.instance.addObserver(this);
-    setState(() {
-      initPlatformState();
+    open.getSpeechString.listen((event) {
+      setState(() {
+        isRecording = false;
+        text = event;
+      });
     });
+    WidgetsBinding.instance.addObserver(this);
   }
-
-  Future<void> initPlatformState() async {
-    if (!mounted) return;
-    listenToMic.isActive = true;
-
-    Statistics(false);
-
-    controller =
-        AnimationController(duration: Duration(seconds: 1), vsync: this)
-          ..addListener(() {
-            if (listenToMic.isRecording) setState(() {});
-          })
-          ..addStatusListener((status) {
-            if (status == AnimationStatus.completed)
-              controller.reverse();
-            else if (status == AnimationStatus.dismissed) controller.forward();
-          })
-          ..forward();
-  }
-
-  void _controlPage(int index) => setState(() => page = index);
 
   @override
   Widget build(BuildContext context) {
-    // This method is rerun every time setState is called, for instance as done
-    // by the _incrementCounter method above.
-    //
-    // The Flutter framework has been optimized to make rerunning build methods
-    // fast, so that you can just rebuild anything that needs updating rather
-    // than having to individually change instances of widgets.
     return MaterialApp(
       theme: ThemeData.dark(),
       home: Scaffold(
-          appBar: AppBar(
-            title: const Text('Plugin: mic_stream :: Debug'),
-          ),
-          floatingActionButton: FloatingActionButton(
-            onPressed: () {
-              listenToMic.controlMicStream();
-              setState(() {
-              });
-            },
-            child: _getIcon(),
-            foregroundColor: _iconColor,
-            backgroundColor: _getBgColor(),
-            tooltip: (listenToMic.isRecording)
-                ? "Stop recording"
-                : "Start recording",
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            items: [
-              BottomNavigationBarItem(
-                icon: Icon(Icons.broken_image),
-                label: "Sound Wave",
+        appBar: AppBar(
+          title: const Text('Plugin: mic_stream :: Debug'),
+        ),
+        floatingActionButton: FloatingActionButton(
+          onPressed: () async {
+            if (isRecording == false) {
+              await open.startRecording();
+              isRecording = true;
+            } else {
+              await open.cleanRecording(true);
+              isRecording = false;
+            }
+            setState(() {});
+          },
+          tooltip: 'Start Recording',
+          child: Icon(isRecording ? Icons.pause : Icons.mic),
+        ),
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: <Widget>[
+              Text(
+                text,
               ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.broken_image),
-                label: "Intensity Wave",
-              ),
-              BottomNavigationBarItem(
-                icon: Icon(Icons.view_list),
-                label: "Statistics",
-              )
             ],
-            backgroundColor: Colors.black26,
-            elevation: 20,
-            currentIndex: page,
-            onTap: _controlPage,
           ),
-          body: (page == 0 || page == 1)
-              ? CustomPaint(
-                  painter: page == 0
-                      ? WavePainter(
-                          samples: listenToMic.waveSamples,
-                          color: _getBgColor(),
-                          index: listenToMic.sampleIndex,
-                          localMax: listenToMic.localMax,
-                          localMin: listenToMic.localMin,
-                          context: context,
-                        )
-                      : IntensityPainter(
-                          samples: listenToMic.intensitySamples,
-                          color: _getBgColor(),
-                          index: listenToMic.sampleIndex,
-                          localMax: listenToMic.localMax,
-                          localMin: listenToMic.localMin,
-                          context: context,
-                        ))
-              : Statistics(
-                  listenToMic.isRecording,
-                  startTime: listenToMic.startTime,
-                )),
+        ),
+      ),
     );
   }
 
   @override
-  void didChangeAppLifecycleState(AppLifecycleState state) {
-    if (state == AppLifecycleState.resumed) {
-      listenToMic.isActive = true;
-      print("Resume app");
-
-      listenToMic.controlMicStream(
-          command:
-              listenToMic.memRecordingState ? Command.start : Command.stop);
-    } else if (listenToMic.isActive) {
-      listenToMic.memRecordingState = listenToMic.isRecording;
-      listenToMic.controlMicStream(command: Command.stop);
-
-      print("Pause app");
-      listenToMic.isActive = false;
-    }
-  }
-
-  @override
   void dispose() {
-    listenToMic.listener.cancel();
-    controller.dispose();
     WidgetsBinding.instance.removeObserver(this);
     super.dispose();
   }
-}
-
-class WavePainter extends CustomPainter {
-  int? index;
-  double? localMax;
-  double? localMin;
-  List<double>? samples;
-  late List<Offset> points;
-  Color? color;
-  BuildContext? context;
-  Size? size;
-
-  WavePainter(
-      {this.samples,
-      this.color,
-      this.context,
-      this.index,
-      this.localMax,
-      this.localMin});
-
-  @override
-  void paint(Canvas canvas, Size? size) {
-    this.size = context!.size;
-    size = this.size;
-    if (size == null) return;
-    screenWidth = size.width.toInt();
-
-    Paint paint = new Paint()
-      ..color = color!
-      ..strokeWidth = 1.0
-      ..style = PaintingStyle.stroke;
-
-    samples ??= List.filled(screenWidth, 0);
-    index ??= 0;
-    points = toPoints(samples!, index!);
-
-    Path path = new Path();
-    path.addPolygon(points, false);
-
-    canvas.drawPath(path, paint);
-  }
-
-  @override
-  bool shouldRepaint(CustomPainter oldPainting) => true;
-
-  // Maps a list of ints and their indices to a list of points on a cartesian grid
-  List<Offset> toPoints(List<double> samples, int index) {
-    List<Offset> points = [];
-    double totalMax = max(-1 * localMin!, localMax!);
-    double maxHeight = 0.5 * size!.height;
-    for (int i = 0; i < screenWidth; i++) {
-      double height = maxHeight +
-          ((totalMax == 0 || index == 0)
-              ? 0
-              : (samples[(i + index) % index] / totalMax * maxHeight));
-      var point = Offset(i.toDouble(), height);
-      points.add(point);
-    }
-    return points;
-  }
-}
-
-class IntensityPainter extends CustomPainter {
-  int? index;
-  double? localMax;
-  double? localMin;
-  List<double>? samples;
-  late List<Offset> points;
-  Color? color;
-  BuildContext? context;
-  Size? size;
-
-  IntensityPainter(
-      {this.samples,
-      this.color,
-      this.context,
-      this.index,
-      this.localMax,
-      this.localMin});
-
-  @override
-  void paint(Canvas canvas, Size? size) {}
-
-  @override
-  bool shouldRepaint(CustomPainter oldPainting) => true;
-
-  // Maps a list of ints and their indices to a list of points on a cartesian grid
-  List<Offset> toPoints(List<int>? samples) {
-    return points;
-  }
-
-  double project(double val, double max, double height) {
-    if (max == 0) {
-      return 0.5 * height;
-    }
-    var rv = val / max * 0.5 * height;
-    return rv;
-  }
-}
-
-class Statistics extends StatelessWidget {
-  final bool isRecording;
-  final DateTime? startTime;
-
-  final String url = "https://github.com/anarchuser/mic_stream";
-
-  Statistics(this.isRecording, {this.startTime});
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(children: <Widget>[
-      ListTile(
-          leading: Icon(Icons.title),
-          title: Text("Microphone Streaming Example App")),
-      ListTile(
-        leading: Icon(Icons.keyboard_voice),
-        title: Text((isRecording ? "Recording" : "Not recording")),
-      ),
-      ListTile(
-          leading: Icon(Icons.access_time),
-          title: Text((isRecording
-              ? DateTime.now().difference(startTime!).toString()
-              : "Not recording"))),
-    ]);
-  }
-}
-
-Iterable<T> eachWithIndex<E, T>(
-    Iterable<T> items, E Function(int index, T item) f) {
-  var index = 0;
-
-  for (final item in items) {
-    f(index, item);
-    index = index + 1;
-  }
-
-  return items;
 }
