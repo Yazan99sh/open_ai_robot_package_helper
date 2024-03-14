@@ -11,7 +11,8 @@ void main() async {
       'org-sxjmO2cujjHwd3DMmYATC1T9',
       OpenAiOption(
         character: Character.house,
-        guidance: [],
+        guidance: [
+        ],
       ));
   runApp(const MyApp());
 }

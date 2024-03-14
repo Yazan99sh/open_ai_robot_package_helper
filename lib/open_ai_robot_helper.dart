@@ -55,7 +55,7 @@ class OpenAiRobotHelper {
           }
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 5) {
+          if (DateTime.now().difference(silenceDuration).inSeconds > 3) {
             await stopRecording();
             final textResult =
                 await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
