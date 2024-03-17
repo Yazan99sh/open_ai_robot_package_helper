@@ -15,11 +15,13 @@ class OpenAiRobotHelper {
   late OpenAiOption options;
   List<OpenAIChatCompletionChoiceMessageModel> messages = [];
   late AudioRecorder record;
+
   Future<void> init(String appKey, String orgID, OpenAiOption opt) async {
     options = opt;
     openAIMain = OpenAIMain();
     await openAIMain.initOpenAIClient(appKey, orgID);
   }
+
   Timer? timer;
   DateTime silenceDuration = DateTime.now();
   DateTime startDuration = DateTime.now();
@@ -29,37 +31,37 @@ class OpenAiRobotHelper {
   Stream<String> get getSpeechString => controller.stream;
 
   Stream<String> get getAudioString => controller.stream;
+  List<num> amplitudes = [];
 
   Future<void> startRecording() async {
+    amplitudes = [];
     record = AudioRecorder();
     if (await record.hasPermission()) {
       startDuration = DateTime.now();
       silenceDuration = DateTime.now();
       final path = await getApplicationDocumentsDirectory();
       await Directory('${path.path}/recorder').create(recursive: true);
-      await record.start(const RecordConfig(), path: '${path.path}/recorder/speech.m4a');
+      await record.start(const RecordConfig(),
+          path: '${path.path}/recorder/speech.m4a');
       timer = Timer.periodic(const Duration(milliseconds: 50), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
         double valume = (amplitude.current - (-45)) / (-45);
         print('valume: $valume');
         print('amplitude: ${amplitude.current}');
+        amplitudes.add(amplitude.current);
         if (amplitude.current > -10) {
           print('Laoud: ---------------------->');
           silenceDuration = DateTime.now();
-          if (DateTime.now().difference(startDuration).inSeconds > 30) {
+          if (DateTime.now().difference(startDuration).inSeconds > 60) {
             await stopRecording();
-            final textResult =
-                await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
-            controller.add(textResult);
+            await _transcribe(path);
             await cleanRecording();
           }
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 3) {
+          if (DateTime.now().difference(silenceDuration).inSeconds > 1) {
             await stopRecording();
-            final textResult =
-                await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
-            controller.add(textResult);
+            await _transcribe(path);
             await cleanRecording();
           }
         }
@@ -116,5 +118,25 @@ class OpenAiRobotHelper {
     final player = AudioPlayer();
     final path = await openAIMain.generateSpeechAudio(text);
     await player.play(DeviceFileSource(path));
+  }
+
+  _transcribe(Directory path) async {
+    if (!_checkIfSomeoneIsTalking()) {
+      return;
+    }
+    final textResult =
+        await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
+    controller.add(textResult);
+  }
+
+  bool _checkIfSomeoneIsTalking() {
+    int count = 0;
+    for (var ampl in amplitudes) {
+      if (ampl > -10) {
+        count++;
+      }
+    }
+    var percent = (count * 100 ) / amplitudes.length;
+    return percent >= 50;
   }
 }

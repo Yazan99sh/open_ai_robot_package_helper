@@ -7,11 +7,12 @@ final open = OpenAiRobotHelper();
 
 void main() async {
   open.init(
-      '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',
-      'org-sxjmO2cujjHwd3DMmYATC1T9',
+      '-',
+      '-',
       OpenAiOption(
-        character: Character.house,
+        character: Character.developer,
         guidance: [
+          'make your response short do not exceed more than 150'
         ],
       ));
   runApp(const MyApp());
@@ -89,6 +90,8 @@ class _MyHomePageState extends State<MyHomePage>
   sendToGpt() async {
     response = await open.sendANewMessage(text);
     await open.getSpeechAudio(response);
+    await open.startRecording();
+    isRecording = true;
     setState(() {});
   }
 

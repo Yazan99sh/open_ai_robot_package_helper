@@ -18,7 +18,7 @@ class OpenAIMain {
     final result = await OpenAI.instance.audio.createTranscription(
       file: File(audioPath),
       model: 'whisper-1',
-      prompt: 'Fucos on the higher pitch and ignore the rest , and then detect that language and rsponde with right carachter focus on arabic and english ',
+      prompt: 'Fucos on the higher pitch and ignore the rest , and then detect that language and response with right character focus on arabic and english ',
       responseFormat: OpenAIAudioResponseFormat.json,
     );
     return result.text;

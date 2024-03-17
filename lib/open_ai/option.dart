@@ -10,6 +10,7 @@ class OpenAiOption {
 
 enum Character {
   house('Respond like House in the famous tv series'),
+  developer('Respond like an expert in software development'),
   ;
 
   final String characterPrompt;
