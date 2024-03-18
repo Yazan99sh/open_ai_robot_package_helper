@@ -122,8 +122,8 @@ class OpenAiRobotHelper {
 
   _transcribe(Directory path) async {
     if (!_checkIfSomeoneIsTalking()) {
-      cleanRecording();
-      startRecording();
+      await cleanRecording();
+      await startRecording();
       return;
     }
     final textResult =
@@ -138,7 +138,7 @@ class OpenAiRobotHelper {
         count++;
       }
     }
-    var percent = (count * 100 ) / amplitudes.length;
+    var percent = (count * 100) / amplitudes.length;
     return percent >= 5;
   }
 }
