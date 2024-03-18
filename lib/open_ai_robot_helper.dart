@@ -46,24 +46,25 @@ class OpenAiRobotHelper {
       timer = Timer.periodic(const Duration(milliseconds: 50), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
         double valume = (amplitude.current - (-45)) / (-45);
-        print('valume: $valume');
+        //print('valume: $valume');
         print('amplitude: ${amplitude.current}');
         amplitudes.add(amplitude.current);
-        if (amplitude.current > -10) {
+        if (amplitude.current > -15) {
           print('Laoud: ---------------------->');
           silenceDuration = DateTime.now();
-          if (DateTime.now().difference(startDuration).inSeconds > 60) {
-            await stopRecording();
-            await _transcribe(path);
-            await cleanRecording();
-          }
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 3) {
+          if (DateTime.now().difference(silenceDuration).inSeconds > 3 ||
+              DateTime.now().difference(startDuration).inSeconds > 10) {
             await stopRecording();
             await _transcribe(path);
             await cleanRecording();
           }
+        }
+        if (DateTime.now().difference(startDuration).inSeconds > 60) {
+          await stopRecording();
+          await _transcribe(path);
+          await cleanRecording();
         }
       });
     }
@@ -76,10 +77,14 @@ class OpenAiRobotHelper {
   }
 
   Future<void> cleanRecording() async {
-    await stopRecording();
-    final path = await getApplicationDocumentsDirectory();
-    // delete directory
-    await Directory('${path.path}/recorder').delete(recursive: true);
+    try {
+      await stopRecording();
+      final path = await getApplicationDocumentsDirectory();
+      // delete directory
+      await Directory('${path.path}/recorder').delete(recursive: true);
+    } catch (e) {
+      print(e);
+    }
   }
 
   void clearUserQuestion() {
@@ -134,11 +139,11 @@ class OpenAiRobotHelper {
   bool _checkIfSomeoneIsTalking() {
     int count = 0;
     for (var ampl in amplitudes) {
-      if (ampl > -10) {
+      if (ampl > -15) {
         count++;
       }
     }
     var percent = (count * 100) / amplitudes.length;
-    return percent >= 5;
+    return percent >= 2;
   }
 }
