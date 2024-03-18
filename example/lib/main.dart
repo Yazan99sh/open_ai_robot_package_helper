@@ -7,8 +7,8 @@ final open = OpenAiRobotHelper();
 
 void main() async {
   open.init(
-      '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',
-      'org-sxjmO2cujjHwd3DMmYATC1T9',
+      '-',
+      '-',
       OpenAiOption(
         character: Character.funny,
         guidance: [
