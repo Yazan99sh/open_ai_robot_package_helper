@@ -59,7 +59,7 @@ class OpenAiRobotHelper {
           }
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 1) {
+          if (DateTime.now().difference(silenceDuration).inSeconds > 3) {
             await stopRecording();
             await _transcribe(path);
             await cleanRecording();
@@ -139,6 +139,6 @@ class OpenAiRobotHelper {
       }
     }
     var percent = (count * 100 ) / amplitudes.length;
-    return percent >= 50;
+    return percent >= 5;
   }
 }
