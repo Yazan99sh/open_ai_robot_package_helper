@@ -122,6 +122,8 @@ class OpenAiRobotHelper {
 
   _transcribe(Directory path) async {
     if (!_checkIfSomeoneIsTalking()) {
+      cleanRecording();
+      startRecording();
       return;
     }
     final textResult =

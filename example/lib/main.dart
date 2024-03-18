@@ -10,7 +10,7 @@ void main() async {
       '-',
       '-',
       OpenAiOption(
-        character: Character.developer,
+        character: Character.funny,
         guidance: [
           'make your response short do not exceed more than 150'
         ],
