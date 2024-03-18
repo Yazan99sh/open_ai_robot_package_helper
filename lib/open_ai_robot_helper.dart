@@ -126,11 +126,11 @@ class OpenAiRobotHelper {
   }
 
   _transcribe(Directory path) async {
-    if (!_checkIfSomeoneIsTalking()) {
-      await cleanRecording();
-      await startRecording();
-      return;
-    }
+    // if (!_checkIfSomeoneIsTalking()) {
+    //   await cleanRecording();
+    //   await startRecording();
+    //   return;
+    // }
     final textResult =
         await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
     controller.add(textResult);
