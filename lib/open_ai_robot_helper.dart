@@ -64,11 +64,6 @@ class OpenAiRobotHelper {
             await cleanRecording();
           }
         }
-        if (DateTime.now().difference(startDuration).inSeconds > 60) {
-          await stopRecording();
-          await _transcribe(path);
-          await cleanRecording();
-        }
       });
     }
   }
