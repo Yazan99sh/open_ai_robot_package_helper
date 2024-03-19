@@ -15,11 +15,13 @@ class OpenAiRobotHelper {
   late OpenAiOption options;
   List<OpenAIChatCompletionChoiceMessageModel> messages = [];
   late AudioRecorder record;
+  late AudioPlayer player;
 
   Future<void> init(String appKey, String orgID, OpenAiOption opt) async {
     options = opt;
     openAIMain = OpenAIMain();
     await openAIMain.initOpenAIClient(appKey, orgID);
+    player = AudioPlayer();
   }
 
   Timer? timer;
@@ -36,6 +38,7 @@ class OpenAiRobotHelper {
   Future<void> startRecording() async {
     amplitudes = [];
     record = AudioRecorder();
+    await player.play(AssetSource('sounds/start.mp3'));
     if (await record.hasPermission()) {
       startDuration = DateTime.now();
       silenceDuration = DateTime.now();
@@ -71,6 +74,7 @@ class OpenAiRobotHelper {
   }
 
   Future<void> stopRecording() async {
+    await player.play(AssetSource('sounds/stop.mp3'));
     timer?.cancel();
     await record.stop();
     //await record.dispose();
@@ -120,7 +124,6 @@ class OpenAiRobotHelper {
   }
 
   Future<void> getSpeechAudio(String text) async {
-    final player = AudioPlayer();
     final path = await openAIMain.generateSpeechAudio(text);
     await player.play(DeviceFileSource(path));
   }
