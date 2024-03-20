@@ -28,12 +28,11 @@ class OpenAiRobotHelper {
   Timer? timer;
   DateTime silenceDuration = DateTime.now();
   DateTime startDuration = DateTime.now();
-  StreamController<String> controller = StreamController<String>();
+  StreamController<String?> controller = StreamController<String>();
   StreamController<String> controllerForAudio = StreamController<String>();
 
-  Stream<String> get getSpeechString => controller.stream;
+  Stream<String?> get getSpeechString => controller.stream;
 
-  Stream<String> get getAudioString => controller.stream;
   List<num> amplitudes = [];
 
   Future<void> startRecording() async {
@@ -131,7 +130,7 @@ class OpenAiRobotHelper {
       await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
       controller.add(textResult);
     } catch (e) {
-      controller.add('Sorry, Can you repeat that again?');
+      controller.add(null);
     }
   }
 }
