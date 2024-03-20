@@ -128,7 +128,7 @@ class OpenAiRobotHelper {
       await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
       controller.add(textResult);
     } catch (e) {
-      controller.add(null);
+      controller.add('');
     }
   }
 }
