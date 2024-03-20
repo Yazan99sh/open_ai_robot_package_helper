@@ -26,12 +26,11 @@ class OpenAiRobotHelper {
   }
 
   Timer? timer;
-  DateTime silenceDuration = DateTime.now();
   DateTime startDuration = DateTime.now();
-  StreamController<String?> controller = StreamController<String>();
+  StreamController<String> controller = StreamController<String>();
   StreamController<String> controllerForAudio = StreamController<String>();
 
-  Stream<String?> get getSpeechString => controller.stream;
+  Stream<String> get getSpeechString => controller.stream;
 
   List<num> amplitudes = [];
 
@@ -39,7 +38,6 @@ class OpenAiRobotHelper {
     amplitudes = [];
     if (await record.hasPermission()) {
       startDuration = DateTime.now();
-      silenceDuration = DateTime.now();
       final path = await getApplicationDocumentsDirectory();
       await Directory('${path.path}/recorder').create(recursive: true);
       await record.start(
@@ -47,18 +45,16 @@ class OpenAiRobotHelper {
             noiseSuppress: true,
           ),
           path: '${path.path}/recorder/speech.m4a');
-      timer = Timer.periodic(const Duration(milliseconds: 50), (timer) async {
+      timer = Timer.periodic(const Duration(milliseconds: 25), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
-        double valume = (amplitude.current - (-45)) / (-45);
-        //print('valume: $valume');
-        print('amplitude: ${amplitude.current}');
         amplitudes.add(amplitude.current);
-        if (DateTime.now().difference(startDuration).inSeconds > 10 &&
+        if (DateTime.now().difference(startDuration).inSeconds > 15 ||
             _checkAmplitude(amplitudes)) {
           await stopRecording();
           await _transcribe(path);
           await cleanRecording();
         }
+        print('amplitude: ${amplitude.current}');
       });
     }
   }
@@ -119,6 +115,10 @@ class OpenAiRobotHelper {
   }
 
   _transcribe(Directory path) async {
+    if (_isSomeOneSpeaking() == false) {
+      controller.add('');
+      return;
+    }
     try {
       final textResult = await openAIMain
           .convertAudioToText('${path.path}/recorder/speech.m4a');
@@ -129,12 +129,32 @@ class OpenAiRobotHelper {
   }
 
   _checkAmplitude(List<num> amplitudes) {
-    int count = 0;
-    for (var i = 0; i < amplitudes.length; i++) {
-      if (amplitudes[i] >= -10) {
-        count++;
+    bool speechFinish = false;
+    int index = 0;
+    for (var i = 0; i < amplitudes.length - 1; i++) {
+      print('amplitude: ${amplitudes[i]} index : $i');
+      if (amplitudes[i] >= -5 && amplitudes[i + 1] < -5) {
+        speechFinish = true;
+        index = i;
       }
     }
-    return count > 1;
+    return speechFinish && (amplitudes.length - index) >= 125;
+  }
+
+  _isSomeOneSpeaking() {
+    int count = 0;
+    int maximum = -100;
+    for (var i = 0; i < amplitudes.length - 1; i++) {
+      print('amplitude: ${amplitudes[i]} index : $i');
+      if (amplitudes[i] > -2) {
+        count++;
+      }
+      if (maximum <= amplitudes[i]) {
+        maximum = amplitudes[i].toInt();
+      }
+    }
+    var percent = ((count * 100) / amplitudes.length);
+    print('count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
+    return count > 0;
   }
 }
