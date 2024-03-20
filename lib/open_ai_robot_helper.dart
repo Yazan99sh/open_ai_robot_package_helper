@@ -22,6 +22,7 @@ class OpenAiRobotHelper {
     openAIMain = OpenAIMain();
     await openAIMain.initOpenAIClient(appKey, orgID);
     player = AudioPlayer();
+    record = AudioRecorder();
   }
 
   Timer? timer;
@@ -37,14 +38,15 @@ class OpenAiRobotHelper {
 
   Future<void> startRecording() async {
     amplitudes = [];
-    record = AudioRecorder();
     await player.play(AssetSource('sounds/start.mp3'));
     if (await record.hasPermission()) {
       startDuration = DateTime.now();
       silenceDuration = DateTime.now();
       final path = await getApplicationDocumentsDirectory();
       await Directory('${path.path}/recorder').create(recursive: true);
-      await record.start(const RecordConfig(),
+      await record.start(const RecordConfig(
+        noiseSuppress: true,
+      ),
           path: '${path.path}/recorder/speech.m4a');
       timer = Timer.periodic(const Duration(milliseconds: 50), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
@@ -57,7 +59,7 @@ class OpenAiRobotHelper {
           silenceDuration = DateTime.now();
         } else {
           print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 3 ||
+          if (DateTime.now().difference(silenceDuration).inSeconds > 2 ||
               DateTime.now().difference(startDuration).inSeconds > 10) {
             await stopRecording();
             await _transcribe(path);
@@ -124,24 +126,12 @@ class OpenAiRobotHelper {
   }
 
   _transcribe(Directory path) async {
-    // if (!_checkIfSomeoneIsTalking()) {
-    //   await cleanRecording();
-    //   await startRecording();
-    //   return;
-    // }
-    final textResult =
-        await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
-    controller.add(textResult);
-  }
-
-  bool _checkIfSomeoneIsTalking() {
-    int count = 0;
-    for (var ampl in amplitudes) {
-      if (ampl > -15) {
-        count++;
-      }
+    try {
+      final textResult =
+      await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
+      controller.add(textResult);
+    } catch (e) {
+      controller.add('Sorry, Can you repeat that again?');
     }
-    var percent = (count * 100) / amplitudes.length;
-    return percent >= 2;
   }
 }
