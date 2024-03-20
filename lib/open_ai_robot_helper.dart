@@ -42,9 +42,10 @@ class OpenAiRobotHelper {
       silenceDuration = DateTime.now();
       final path = await getApplicationDocumentsDirectory();
       await Directory('${path.path}/recorder').create(recursive: true);
-      await record.start(const RecordConfig(
-        noiseSuppress: true,
-      ),
+      await record.start(
+          const RecordConfig(
+            noiseSuppress: true,
+          ),
           path: '${path.path}/recorder/speech.m4a');
       timer = Timer.periodic(const Duration(milliseconds: 50), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
@@ -52,17 +53,11 @@ class OpenAiRobotHelper {
         //print('valume: $valume');
         print('amplitude: ${amplitude.current}');
         amplitudes.add(amplitude.current);
-        if (amplitude.current > -15) {
-          print('Laoud: ---------------------->');
-          silenceDuration = DateTime.now();
-        } else {
-          print('Quite: ---------------------->');
-          if (DateTime.now().difference(silenceDuration).inSeconds > 2 ||
-              DateTime.now().difference(startDuration).inSeconds > 10) {
-            await stopRecording();
-            await _transcribe(path);
-            await cleanRecording();
-          }
+        if (DateTime.now().difference(startDuration).inSeconds > 10 &&
+            _checkAmplitude(amplitudes)) {
+          await stopRecording();
+          await _transcribe(path);
+          await cleanRecording();
         }
       });
     }
@@ -76,6 +71,7 @@ class OpenAiRobotHelper {
 
   Future<void> cleanRecording() async {
     try {
+      amplitudes = [];
       await stopRecording();
       final path = await getApplicationDocumentsDirectory();
       // delete directory
@@ -124,11 +120,21 @@ class OpenAiRobotHelper {
 
   _transcribe(Directory path) async {
     try {
-      final textResult =
-      await openAIMain.convertAudioToText('${path.path}/recorder/speech.m4a');
+      final textResult = await openAIMain
+          .convertAudioToText('${path.path}/recorder/speech.m4a');
       controller.add(textResult);
     } catch (e) {
       controller.add('');
     }
+  }
+
+  _checkAmplitude(List<num> amplitudes) {
+    int count = 0;
+    for (var i = 0; i < amplitudes.length; i++) {
+      if (amplitudes[i] >= -10) {
+        count++;
+      }
+    }
+    return count > 1;
   }
 }
