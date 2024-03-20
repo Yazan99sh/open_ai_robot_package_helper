@@ -37,7 +37,6 @@ class OpenAiRobotHelper {
 
   Future<void> startRecording() async {
     amplitudes = [];
-    await player.play(AssetSource('sounds/start.mp3'));
     if (await record.hasPermission()) {
       startDuration = DateTime.now();
       silenceDuration = DateTime.now();
@@ -70,7 +69,6 @@ class OpenAiRobotHelper {
   }
 
   Future<void> stopRecording() async {
-    await player.play(AssetSource('sounds/stop.mp3'));
     timer?.cancel();
     await record.stop();
     //await record.dispose();
