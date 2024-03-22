@@ -87,11 +87,17 @@ class OpenAiRobotHelper {
         content: [
           OpenAIChatCompletionChoiceMessageContentItemModel.text(
               options.character.characterPrompt),
-          for (var g in options.guidance)
-            OpenAIChatCompletionChoiceMessageContentItemModel.text(g),
         ],
         role: OpenAIChatMessageRole.system,
       ));
+      for (var g in options.guidance)
+        messages.add(OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                g),
+          ],
+          role: OpenAIChatMessageRole.system,
+        ));
     }
     messages.add(OpenAIChatCompletionChoiceMessageModel(
       content: [
@@ -146,7 +152,7 @@ class OpenAiRobotHelper {
     int maximum = -100;
     for (var i = 0; i < amplitudes.length - 1; i++) {
       print('amplitude: ${amplitudes[i]} index : $i');
-      if (amplitudes[i] > -2) {
+      if (amplitudes[i] > -3) {
         count++;
       }
       if (maximum <= amplitudes[i]) {
@@ -154,7 +160,11 @@ class OpenAiRobotHelper {
       }
     }
     var percent = ((count * 100) / amplitudes.length);
-    print('count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
+    print(
+        'count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
     return count > 0;
+  }
+  void _addGuiding(String guidance) async {
+    options.guidance.add(guidance);
   }
 }

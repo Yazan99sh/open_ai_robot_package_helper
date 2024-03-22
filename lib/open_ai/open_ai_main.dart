@@ -18,7 +18,12 @@ class OpenAIMain {
     final result = await OpenAI.instance.audio.createTranscription(
       file: File(audioPath),
       model: 'whisper-1',
-      prompt: 'Fucos on the higher pitch and ignore the rest , and then detect that language and response with right character focus on arabic and english ',
+      prompt: """
+      This prompt instructs a speech-to-text system to improve accuracy by considering conversation context. It asks the system to:
+      Identify the spoken language.
+      Use details like conversation topic, location, and previous صحبت (suh-bat, meaning "conversation") to improve transcription.
+      Suggest corrections for common speech recognition errors.
+      """,
       responseFormat: OpenAIAudioResponseFormat.json,
     );
     return result.text;
@@ -39,7 +44,7 @@ class OpenAIMain {
     File speechFile = await OpenAI.instance.audio.createSpeech(
       model: "tts-1",
       input: text,
-      voice: "alloy",
+      voice: "nova",
       responseFormat: OpenAIAudioSpeechResponseFormat.mp3,
       outputDirectory: await Directory('${path.path}/speech').create(),
       outputFileName: "s",
