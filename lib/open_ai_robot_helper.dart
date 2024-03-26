@@ -93,8 +93,7 @@ class OpenAiRobotHelper {
       for (var g in options.guidance)
         messages.add(OpenAIChatCompletionChoiceMessageModel(
           content: [
-            OpenAIChatCompletionChoiceMessageContentItemModel.text(
-                g),
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(g),
           ],
           role: OpenAIChatMessageRole.system,
         ));
@@ -118,6 +117,9 @@ class OpenAiRobotHelper {
   Future<void> getSpeechAudio(String text) async {
     final path = await openAIMain.generateSpeechAudio(text);
     await player.play(DeviceFileSource(path));
+    await Future.delayed((await player.getDuration()) ??
+        Duration(seconds: 1 * (text.length / 10).round()));
+    return;
   }
 
   _transcribe(Directory path) async {
@@ -164,7 +166,12 @@ class OpenAiRobotHelper {
         'count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
     return count > 0;
   }
-  void _addGuiding(String guidance) async {
+
+  void addGuiding(String guidance) async {
     options.guidance.add(guidance);
+  }
+
+  void clearGuiding() async {
+    options.guidance.clear();
   }
 }
