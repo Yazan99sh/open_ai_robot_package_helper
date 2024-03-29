@@ -19,10 +19,7 @@ class OpenAIMain {
       file: File(audioPath),
       model: 'whisper-1',
       prompt: """
-      This prompt instructs a speech-to-text system to improve accuracy by considering conversation context. It asks the system to:
       Identify the spoken language.
-      Use details like conversation topic, location, and previous صحبت (suh-bat, meaning "conversation") to improve transcription.
-      Suggest corrections for common speech recognition errors.
       """,
       responseFormat: OpenAIAudioResponseFormat.json,
     );
@@ -44,7 +41,7 @@ class OpenAIMain {
     File speechFile = await OpenAI.instance.audio.createSpeech(
       model: "tts-1",
       input: text,
-      voice: "nova",
+      voice: "alloy",
       responseFormat: OpenAIAudioSpeechResponseFormat.mp3,
       outputDirectory: await Directory('${path.path}/speech').create(),
       outputFileName: "s",
