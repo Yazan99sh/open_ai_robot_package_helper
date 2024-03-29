@@ -43,12 +43,14 @@ class OpenAiRobotHelper {
       await record.start(
           const RecordConfig(
             noiseSuppress: true,
+            echoCancel: true,
+            autoGain: true,
           ),
           path: '${path.path}/recorder/speech.m4a');
       timer = Timer.periodic(const Duration(milliseconds: 25), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
         amplitudes.add(amplitude.current);
-        if (DateTime.now().difference(startDuration).inSeconds > 15 ||
+        if (DateTime.now().difference(startDuration).inSeconds > 7 ||
             _checkAmplitude(amplitudes)) {
           await stopRecording();
           await _transcribe(path);
@@ -154,7 +156,7 @@ class OpenAiRobotHelper {
     int maximum = -100;
     for (var i = 0; i < amplitudes.length - 1; i++) {
       print('amplitude: ${amplitudes[i]} index : $i');
-      if (amplitudes[i] > -3) {
+      if (amplitudes[i] > -4) {
         count++;
       }
       if (maximum <= amplitudes[i]) {
