@@ -1,10 +1,12 @@
 class OpenAiOption {
   Character character;
   List<String> guidance;
+  bool log;
 
   OpenAiOption({
     required this.character,
     required this.guidance,
+    required this.log,
   });
 }
 

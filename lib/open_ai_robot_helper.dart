@@ -50,13 +50,16 @@ class OpenAiRobotHelper {
       timer = Timer.periodic(const Duration(milliseconds: 25), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
         amplitudes.add(amplitude.current);
-        if (DateTime.now().difference(startDuration).inSeconds > 7 ||
+        if (DateTime
+            .now()
+            .difference(startDuration)
+            .inSeconds > 7 ||
             _checkAmplitude(amplitudes)) {
           await stopRecording();
           await _transcribe(path);
           await cleanRecording();
         }
-        print('amplitude: ${amplitude.current}');
+        _print('amplitude: ${amplitude.current}');
       });
     }
   }
@@ -142,20 +145,20 @@ class OpenAiRobotHelper {
     bool speechFinish = false;
     int index = 0;
     for (var i = 0; i < amplitudes.length - 1; i++) {
-      print('amplitude: ${amplitudes[i]} index : $i');
+      _print('amplitude: ${amplitudes[i]} index : $i');
       if (amplitudes[i] >= -5 && amplitudes[i + 1] < -5) {
         speechFinish = true;
         index = i;
       }
     }
-    return speechFinish && (amplitudes.length - index) >= 125;
+    return speechFinish && (amplitudes.length - index) >= 100;
   }
 
   _isSomeOneSpeaking() {
     int count = 0;
     int maximum = -100;
     for (var i = 0; i < amplitudes.length - 1; i++) {
-      print('amplitude: ${amplitudes[i]} index : $i');
+      _print('amplitude: ${amplitudes[i]} index : $i');
       if (amplitudes[i] > -4) {
         count++;
       }
@@ -164,8 +167,9 @@ class OpenAiRobotHelper {
       }
     }
     var percent = ((count * 100) / amplitudes.length);
-    print(
-        'count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
+    _print(
+        'count: $count  length: ${amplitudes
+            .length} percent: $percent max: $maximum');
     return count > 0;
   }
 
@@ -175,5 +179,11 @@ class OpenAiRobotHelper {
 
   void clearGuiding() async {
     options.guidance.clear();
+  }
+
+  _print(String text) {
+    if (options.log) {
+      print(text);
+    }
   }
 }
