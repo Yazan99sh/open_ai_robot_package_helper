@@ -13,6 +13,7 @@ class OpenAiOption {
 enum Character {
   house('Respond like House in the famous tv series'),
   funny('Answer in funny way'),
+  none('none'),
   ;
 
   final String characterPrompt;

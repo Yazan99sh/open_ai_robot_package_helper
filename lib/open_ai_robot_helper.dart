@@ -50,10 +50,7 @@ class OpenAiRobotHelper {
       timer = Timer.periodic(const Duration(milliseconds: 25), (timer) async {
         Amplitude amplitude = await record.getAmplitude();
         amplitudes.add(amplitude.current);
-        if (DateTime
-            .now()
-            .difference(startDuration)
-            .inSeconds > 7 ||
+        if (DateTime.now().difference(startDuration).inSeconds > 7 ||
             _checkAmplitude(amplitudes)) {
           await stopRecording();
           await _transcribe(path);
@@ -88,13 +85,15 @@ class OpenAiRobotHelper {
 
   Future<String> sendANewMessage(String newMessage) async {
     if (messages.isEmpty) {
-      messages.add(OpenAIChatCompletionChoiceMessageModel(
-        content: [
-          OpenAIChatCompletionChoiceMessageContentItemModel.text(
-              options.character.characterPrompt),
-        ],
-        role: OpenAIChatMessageRole.system,
-      ));
+      if (options.character != Character.none) {
+        messages.add(OpenAIChatCompletionChoiceMessageModel(
+          content: [
+            OpenAIChatCompletionChoiceMessageContentItemModel.text(
+                options.character.characterPrompt),
+          ],
+          role: OpenAIChatMessageRole.system,
+        ));
+      }
       for (var g in options.guidance)
         messages.add(OpenAIChatCompletionChoiceMessageModel(
           content: [
@@ -116,6 +115,11 @@ class OpenAiRobotHelper {
       ],
       role: OpenAIChatMessageRole.assistant,
     ));
+    if (options.log) {
+      for (var message in messages) {
+        _print('role: ${message.role} content: ${message.content}');
+      }
+    }
     return result;
   }
 
@@ -168,8 +172,7 @@ class OpenAiRobotHelper {
     }
     var percent = ((count * 100) / amplitudes.length);
     _print(
-        'count: $count  length: ${amplitudes
-            .length} percent: $percent max: $maximum');
+        'count: $count  length: ${amplitudes.length} percent: $percent max: $maximum');
     return count > 0;
   }
 
